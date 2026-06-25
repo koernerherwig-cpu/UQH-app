@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0e1a14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="UQH – Planetare Charta zum Schutz der Lebensgrundlagen">
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<!-- Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('ServiceWorker registration successful');
+      })
+      .catch(err => {
+        console.log('ServiceWorker registration failed: ', err);
+      });
+  });
+}
+</script>
+
+<title>UQH — Lebensgrundlagen</title>
+<style>
+/* Dein gesamter CSS-Code bleibt hier unverändert */
+:root {
+  --bg: #0e1a14;
+  --bg2: #162010;
+  --bg3: #1e2d1a;
+  --card: #1a2916;
+  --card2: #213320;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #e8f0e4;
+  --text2: #9ab898;
+  --text3: #5a7858;
+  --accent: #4adf8a;
+  --accent2: #2db868;
+  --accent-dim: rgba(74,223,138,0.12);
+  --gold: #e8c060;
+  --gold-dim: rgba(232,192,96,0.12);
+  --red: #ef6060;
+  --red-dim: rgba(239,96,96,0.1);
+  --blue: #60b4ef;
+  --blue-dim: rgba(96,180,239,0.1);
+  --amber: #e8a040;
+  --amber-dim: rgba(232,160,64,0.1);
+  --safe: #0a3a1a;
+  --r: 12px;
+  --r2: 8px;
+  --nav-h: 60px;
+  --tab-h: 64px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 100vh;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* TOPBAR */
+#topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 10px;
+}
+#topbar .logo-mark {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(74,223,138,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; color: var(--accent); font-weight: 700;
+  letter-spacing: -0.03em; flex-shrink: 0;
+}
+#topbar .top-title { font-size: 15px; font-weight: 600; color: var(--text); flex: 1; }
+#topbar .top-sub { font-size: 11px; color: var(--text3); letter-spacing: 0.05em; }
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+  animation: pulse-dot 2.5s ease-in-out infinite;
+}
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* SCREENS */
+.screen { display: none; padding: 16px 16px calc(var(--tab-h) + 24px); }
+.screen.active { display: block; }
+
+/* TABBAR */
+#tabbar {
+  position: fixed;
+  bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  height: var(--tab-h);
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.tab {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; cursor: pointer; color: var(--text3);
+  font-size: 10px; letter-spacing: 0.03em;
+  transition: color 0.2s; padding: 8px 0;
+  border: none; background: none;
+}
+.tab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tab.active { color: var(--accent); }
+
+/* CARDS */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.card2 {
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+/* LABELS */
+.label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 6px;
+  display: block;
+}
+.heading { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.subtext { font-size: 13px; color: var(--text2); line-height: 1.55; }
+
+/* BADGES */
+.badge {
+  display: inline-block; font-size: 11px; font-weight: 600;
+  padding: 3px 8px; border-radius: 20px; letter-spacing: 0.04em;
+}
+.badge-green { background: var(--accent-dim); color: var(--accent); }
+.badge-gold { background: var(--gold-dim); color: var(--gold); }
+.badge-red { background: var(--red-dim); color: var(--red); }
+.badge-blue { background: var(--blue-dim); color: var(--blue); }
+.badge-amber { background: var(--amber-dim); color: var(--amber); }
+
+/* BUTTONS */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 14px;
+  border-radius: var(--r2); border: none; cursor: pointer;
+  font-size: 15px; font-weight: 600; font-family: inherit;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.btn:active { opacity: 0.8; transform: scale(0.98); }
+.btn-primary { background: var(--accent); color: var(--safe); }
+.btn-outline { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+.btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,96,96,0.2); }
+.btn-gold { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(232,192,96,0.2); }
+.btn-sm {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border2);
+  background: var(--card2); color: var(--text2); font-size: 13px; font-weight: 500;
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.btn-sm:active { opacity: 0.7; }
+
+/* DIVIDER */
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+/* STAT ROW */
+.stat-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 14px 0; }
+.stat-card { background: var(--card2); border-radius: var(--r2); padding: 12px; border: 1px solid var(--border); }
+.stat-val { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1; }
+.stat-lbl { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+/* INPUT */
+input, textarea, select {
+  width: 100%; padding: 12px 14px;
+  background: var(--card2); border: 1px solid var(--border2);
+  border-radius: var(--r2); color: var(--text); font-family: inherit;
+  font-size: 15px; outline: none; margin-bottom: 10px;
+  transition: border-color 0.2s; -webkit-appearance: none;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 100px; }
+select option { background: var(--bg2); }
+label.field-label { font-size: 13px; color: var(--text2); margin-bottom: 6px; display: block; }
+
+/* RANGE */
+input[type=range] {
+  padding: 0; background: none; border: none; margin: 0;
+  accent-color: var(--accent); cursor: pointer; height: 36px;
+}
+
+/* PROGRESS BAR */
+.prog { height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+.prog-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+
+/* SECTION TITLE */
+.section-title {
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text3);
+  margin: 20px 0 10px; display: flex; align-items: center; gap: 8px;
+}
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ARTIKEL ITEM */
+.artikel-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.artikel-item:active { border-color: var(--border2); }
+.artikel-item .art-head { display: flex; align-items: center; gap: 10px; }
+.artikel-num-badge {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+  background: var(--card2); color: var(--text3);
+  padding: 3px 7px; border-radius: 4px; flex-shrink: 0;
+}
+.artikel-title-text { font-size: 14px; font-weight: 500; flex: 1; color: var(--text); }
+.art-expand { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 14px; color: var(--text2); line-height: 1.65; }
+.artikel-item.open .art-expand { display: block; }
+.art-chevron { font-size: 12px; color: var(--text3); transition: transform 0.2s; }
+.artikel-item.open .art-chevron { transform: rotate(180deg); }
+
+/* CASE CARD */
+.case-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--red);
+  border-radius: var(--r2);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.case-card.coop { border-left-color: var(--accent); }
+.case-card.pending { border-left-color: var(--gold); }
+.case-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.case-title { font-size: 14px; font-weight: 600; flex: 1; min-width: 0; }
+.case-body { font-size: 13px; color: var(--text2); line-height: 1.55; }
+.vote-row { display: flex; gap: 8px; margin-top: 10px; }
+.vote-btn {
+  flex: 1; padding: 9px; border-radius: var(--r2); border: 1px solid var(--border2);
+  font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+  background: var(--card2); color: var(--text2); transition: all 0.15s;
+}
+.vote-btn.yes { background: var(--accent-dim); color: var(--accent); border-color: rgba(74,223,138,0.25); }
+.vote-btn.no { background: var(--red-dim); color: var(--red); border-color: rgba(239,96,96,0.25); }
+.vote-btn:active { opacity: 0.7; }
+
+/* SIMULATION */
+.sim-box {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 14px;
+  margin: 10px 0;
+}
+.sim-actors { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.actor-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r2); padding: 12px; text-align: center;
+}
+.actor-icon { font-size: 24px; margin-bottom: 4px; }
+.actor-name { font-size: 12px; color: var(--text3); margin-bottom: 6px; }
+.actor-status { font-size: 13px; font-weight: 600; }
+.actor-card.coop .actor-status { color: var(--accent); }
+.actor-card.defect .actor-status { color: var(--red); }
+.actor-card.neutral .actor-status { color: var(--gold); }
+.result-box {
+  border-radius: var(--r2); padding: 14px; text-align: center;
+  margin-top: 12px; transition: all 0.4s;
+}
+.result-box.coop { background: var(--accent-dim); border: 1px solid rgba(74,223,138,0.2); }
+.result-box.defect { background: var(--red-dim); border: 1px solid rgba(239,96,96,0.2); }
+.result-box.neutral { background: var(--gold-dim); border: 1px solid rgba(232,192,96,0.2); }
+.result-text { font-size: 14px; font-weight: 600; }
+.result-text.coop { color: var(--accent); }
+.result-text.defect { color: var(--red); }
+.result-text.neutral { color: var(--gold); }
+
+/* TRAINING */
+.training-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r2); padding: 14px; margin-bottom: 8px;
+  cursor: pointer; transition: border-color 0.2s;
+}
+.training-item:active { border-color: var(--border2); }
+.t-icon { width: 40px; height: 40px; border-radius: var(--r2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
+.t-content { flex: 1; min-width: 0; }
+.t-title { font-size: 14px; font-weight: 500; color: var(--text); }
+.t-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.t-pts { font-size: 13px; font-weight: 700; color: var(--accent); }
+
+/* TOAST */
+#toast {
+  position: fixed; bottom: calc(var(--tab-h) + 12px); left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--card2); border: 1px solid var(--border2); border-radius: 20px;
+  padding: 10px 18px; font-size: 13px; color: var(--text);
+  opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 200;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* MODAL */
+#modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: 300; align-items: flex-end; justify-content: center;
+}
+#modal-overlay.show { display: flex; }
+#modal-box {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--r) var(--r) 0 0; padding: 20px 16px 32px;
+  width: 100%; max-width: 430px; max-height: 80vh; overflow-y: auto;
+}
+.modal-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 16px; }
+
+/* AXIOM BANNER */
+.axiom-banner {
+  background: var(--gold-dim);
+  border: 1px solid rgba(232,192,96,0.15);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--r2) var(--r2) 0;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+.axiom-text { font-size: 13px; color: var(--gold); line-height: 1.55; font-style: italic; }
+
+/* ESKALATION STEPS */
+.escal-step {
+  display: flex; gap: 12px; padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.escal-step:last-child { border-bottom: none; }
+.escal-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+}
+.e1 { background: var(--blue-dim); color: var(--blue); }
+.e2 { background: var(--gold-dim); color: var(--gold); }
+.e3 { background: var(--amber-dim); color: var(--amber); }
+.e4 { background: var(--red-dim); color: var(--red); }
+.e5 { background: rgba(239,96,96,0.2); color: var(--red); }
+.escal-text { flex: 1; }
+.escal-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.escal-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+/* PWA INSTALL BANNER */
+#install-banner {
+  display: none;
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  align-items: center;
+  gap: 12px;
+}
+#install-banner.show { display: flex; }
+#install-banner .install-text { flex: 1; font-size: 13px; color: var(--text2); }
+#install-banner .install-btn {
+  background: var(--accent);
+  color: var(--safe);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="logo-mark">UQ</div>
+  <div style="flex:1">
+    <div class="top-title" id="screen-title">Übersicht</div>
+    <div class="top-sub">Planetare Charta · v5.0</div>
+  </div>
+  <div class="status-dot" title="System aktiv"></div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div id="install-banner">
+  <span class="install-text">📱 App installieren für bessere Erfahrung</span>
+  <button class="install-btn" onclick="installApp()">Installieren</button>
+</div>
+
+<!-- ======= SCREEN: HOME ======= -->
+<div class="screen active" id="s-home">
+  <!-- Dein gesamter HTML-Inhalt bleibt hier unverändert -->
+  <div class="axiom-banner">
+    <div class="axiom-text">"Das Leben entzieht sich jeder messtechnischen Erfassung — es ist die einzige übergeordnete Macht." — Art. 1</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-val" id="cases-count">24</div>
+      <div class="stat-lbl">Gemeldete Fälle</div>
+      <div class="prog"><div class="prog-fill" style="background:var(--red);width:48%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="users-count">341</div>
+      <div class="stat-lbl">Aktive Nutzer</div>
+      <div class="prog"><div class="prog-fill" style="background:var(--accent);width:34%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="coop-pct">71%</div>
+      <div class="stat-lbl">Kooperation</div>
+      <div class="prog"><div class="prog-fill" style="background:var(--accent);width:71%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">Art. 1</div>
+      <div class="stat-lbl">Axiom aktiv</div>
+      <div class="prog"><div class="prog-fill" style="background:var(--gold);width:100%"></div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Aktuelle Eskalationen</div>
+
+  <div class="case-card">
+    <div class="case-head">
+      <span class="badge badge-red">Stufe 3</span>
+      <span class="case-title">Ostsee — Infrastrukturkonflikt</span>
+    </div>
+    <div class="case-body">Unterbrechung kritischer Unterwasserinfrastruktur. Sensor Art. 36 aktiv. Ventil Stufe 2 ausgelöst.</div>
+  </div>
+
+  <div class="case-card pending">
+    <div class="case-head">
+      <span class="badge badge-gold">Stufe 2</span>
+      <span class="case-title">Sahel — Wasserkonflikt</span>
+    </div>
+    <div class="case-body">Grenzübergreifende Wasserentnahme über Schwellenwert. Deeskalationsfenster: 18 Tage.</div>
+  </div>
+
+  <div class="case-card coop">
+    <div class="case-head">
+      <span class="badge badge-green">Kooperation</span>
+      <span class="case-title">Maas — Grenzfluss-Abkommen</span>
+    </div>
+    <div class="case-body">Erstes Charta-konformes Wasserverteilungsabkommen. Nash-Gleichgewicht erreicht.</div>
+  </div>
+
+  <div class="section-title">Schnellzugriff</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <button class="btn btn-danger" onclick="goTab('melden')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Fall melden
+    </button>
+    <button class="btn btn-gold" onclick="goTab('simulation')">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Simulieren
+    </button>
+  </div>
+</div>
+
+<!-- ======= SCREEN: CHARTA ======= -->
+<div class="screen" id="s-charta">
+  <div style="margin-bottom:14px">
+    <input type="text" id="search-art" placeholder="Artikel suchen…" oninput="filterArt(this.value)" style="margin-bottom:0">
+  </div>
+
+  <div id="art-list">
+  <div class="section-title">Block I · Axiom</div>
+
+  <div class="artikel-item" onclick="toggleArt(this)">
+    <div class="art-head">
+      <span class="artikel-num-badge">Art. 1</span>
+      <span class="artikel-title-text">Das Supreme-Prinzip — Leben als einzige Macht</span>
+      <span class="badge badge-gold" style="flex-shrink:0">Axiom</span>
+      <span class="art-chevron">▾</span>
+    </div>
+    <div class="art-expand">Im Quantenzeitalter ist alle Materie erklärbar — das Leben selbst bleibt die einzige nicht vollständig erklärbare Konstante. Deshalb ist es — für alle Weltanschauungen — die einzige übergeordnete Macht. Gott = Leben. Dieser Artikel ist unveränderlich.</div>
+  </div>
+
+  <div class="artikel-item" onclick="toggleArt(this)">
+    <div class="art-head">
+      <span class="artikel-num-badge">Art. 2</span>
+      <span class="artikel-title-text">Adaptive Regelarchitektur</span>
+      <span class="badge badge-green" style="flex-shrink:0">Adaptiv</span>
+      <span class="art-chevron">▾</span>
+    </div>
+    <div class="art-expand">Regeln passen sich an gemessenes Akteursverhalten an — nicht durch politische Verhandlung. Sensor → Algorithmus → GGL-Validierung. Das Axiom bleibt unberührbar. Alles andere ist justierbar durch partizipative Kalibrierung.</div>
+  </div>
+
+  <div class="artikel-item" onclick="toggleArt(this)">
+    <div class="art-head">
+      <span class="artikel-num-badge">Art. 3</span>
+      <span class="artikel-title-text">Souveränitäts-Verschränkung</span>
+      <span class="badge badge-blue" style="flex-shrink:0">Grundrecht</span>
+      <span class="art-chevron">▾</span>
+    </div>
+    <div class="art-expand">Souveräne Rechte erlöschen augenblicklich wenn ihre Nutzung die Stabilität interdependenter Lebensräume gefährdet. Drei Typen: absolut unteilbar (Atmosphäre, Ozeane), überlappend (Flüsse, Wälder), nominell geteilt (Arktis, Orbit).</div>
+  </div>
+
+  <div class="section-title">Block V · Sicherheit</div>
+
+  <div class="artikel-item" onclick="toggleArt(this)">
+    <div class="art-head">
+      <span class="artikel-num-badge">Art. 20</span>
+      <span class="artikel-title-text">Aufrüstungsspiralen als Verletzung</span>
+      <span class="badge badge-red" style="flex-shrink:0">Sicherheit</span>
+      <span class="art-chevron">▾</span>
+    </div>
+    <div class="art-expand">Militärische Aufrüstungsspiralen sind Lebensgrundlagen-Verletzungen. Sie entstehen aus derselben Tiefenstruktur wie CO₂-Spiralen: rationales Einzelinteresse führt kollektiv zur Katastrophe. Sensor Art. 36 wird bei messbarer Asymmetrie automatisch aktiviert.</div>
+  </div>
+
+  <div class="artikel-item" onclick="toggleArt(this)">
+    <div class="art-head">
+      <span class="artikel-num-badge">Art. 21</span>
+      <span class="artikel-title-text">Abrüstung als dominante Strategie</span>
+      <span class="badge badge-red" style="flex-shrink:0">Sicherheit</span>
+      <span class="art-chevron">▾</span>
+    </div>
+    <div class="art-expand">Die Charta macht Abrüstung rational: Abrüstende Akteure erhalten erhöhten Zugang zu Gemeingütern. Aufrüstende verlieren Zugang proportional — automatisch per Smart Contract. Bei Autokratien: Elite-Targeting statt Breitensanktionen.</div>
+  </div>
+
+  <div class="artikel-item" onclick="toggleArt(this)">
+    <div class="art-head">
+      <span class="artikel-num-badge">Art. 24</span>
+      <span class="artikel-title-text">Konfliktspirale — 5 Eskalationsstufen</span>
+      <span class="badge badge-red" style="flex-shrink:0">Sicherheit</span>
+      <span class="art-chevron">▾</span>
+    </div>
+    <div class="art-expand">
+      <div class="escal-step"><div class="escal-num e1">1</div><div class="escal-text"><div class="escal-title">Asymmetrie erkannt</div><div class="escal-sub">Sensor schlägt an · kein Eingriff</div></div></div>
+      <div class="escal-step"><div class="escal-num e2">2</div><div class="escal-text"><div class="escal-title">Erste Aufrüstung</div><div class="escal-sub">Ventil Stufe 1 · 30-Tage-Fenster</div></div></div>
+      <div class="escal-step"><div class="escal-num e3">3</div><div class="escal-text"><div class="escal-title">Reaktive Aufrüstung</div><div class="escal-sub">Ventil 2 · Art. 6 vorbereitet</div></div></div>
+      <div class="escal-step"><div class="escal-num e4">4</div><div class="escal-text"><div class="escal-title">Konfliktschwelle</div><div class="escal-sub">Elite-Targeting aktiv</div></div></div>
+      <div class="escal-step"><div class="escal-num e5">5</div><div class="escal-text"><div class="escal-title">Bewaffneter Konflikt</div><div class="escal-sub">Nullstellung Art. 6 · Hardware-Eid</div></div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Block VI · Mechanismus</div>
+
+  <div class="artikel-item" onclick="toggleArt(this)">
+    <div class="art-head">
+      <span class="artikel-num-badge">Art. 35</span>
+      <span class="artikel-title-text">Smart Contract Ventil-Protokoll</span>
+      <span class="badge badge-green" style="flex-shrink:0">SC</span>
+      <span class="art-chevron">▾</span>
+    </div>
+    <div class="art-expand">Teilhabe an Gemeingütern ist verhaltensabhängig. Sensor → Smart Contract → automatische Drosselung proportional zum Schaden. Transparent auf der Kette. Reversibel bei Verhaltensänderung. Kein Truppenkommando.</div>
+  </div>
+
+  <div class="artikel-item" onclick="toggleArt(this)">
+    <div class="art-head">
+      <span class="artikel-num-badge">Art. 38</span>
+      <span class="artikel-title-text">Robustheitsklausel</span>
+      <span class="badge badge-gold" style="flex-shrink:0">Robustheit</span>
+      <span class="art-chevron">▾</span>
+    </div>
+    <div class="art-expand">Die Charta strebt ein robustes, kein absolutes Nash-Gleichgewicht an. GGL veröffentlicht alle 5 Jahre Schwachstellen. Defektion liegt in der Hand des Menschen — die Charta verschiebt nur den Punkt, an dem sie irrational wird.</div>
+  </div>
+  </div>
+</div>
+
+<!-- ======= SCREEN: MELDEN ======= -->
+<div class="screen" id="s-melden">
+  <div class="card">
+    <span class="label">Sensor Art. 36</span>
+    <div class="heading">Fall melden</div>
+    <div class="subtext">Jede Meldung trainiert den globalen Sensor. Deine Beobachtung zählt.</div>
+  </div>
+
+  <label class="field-label">Art der Verletzung</label>
+  <select id="case-type">
+    <option value="">Bitte wählen…</option>
+    <option value="aukruestung">Aufrüstung / Rüstungsspirale</option>
+    <option value="wasser">Wasserkreislauf</option>
+    <option value="atmosphaere">Atmosphäre / CO₂</option>
+    <option value="biodiv">Artensterben / Ökosystem</option>
+    <option value="infra">Kritische Infrastruktur</option>
+    <option value="info">Kognitive Manipulation / Krisen-Fabrikation</option>
+    <option value="ressource">Ressourcenmonopolisierung</option>
+    <option value="andere">Andere</option>
+  </select>
+
+  <label class="field-label">Region / Ort</label>
+  <input type="text" id="case-region" placeholder="z. B. Ostseeregion, Sahel, Südchinesisches Meer…">
+
+  <label class="field-label">Eskalationsstufe (Art. 24)</label>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+    <input type="range" min="1" max="5" value="2" id="escal-slider" oninput="updateEscal(this.value)" style="flex:1">
+    <div id="escal-badge" class="badge badge-gold" style="min-width:60px;text-align:center">Stufe 2</div>
+  </div>
+  <div id="escal-desc" class="subtext" style="margin-bottom:10px;font-size:13px">Erste Aufrüstungsbewegung — Ventil Stufe 1 wird aktiviert.</div>
+
+  <label class="field-label">Beschreibung</label>
+  <textarea id="case-desc" placeholder="Was wurde beobachtet? Welche Lebensgrundlage ist betroffen?"></textarea>
+
+  <label class="field-label">Betroffene Charta-Artikel (optional)</label>
+  <input type="text" id="case-arts" placeholder="z. B. Art. 3, Art. 20, Art. 36…">
+
+  <div class="divider"></div>
+
+  <button class="btn btn-primary" onclick="submitCase()">
+    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    Fall einreichen
+  </button>
+  <button class="btn btn-outline" style="margin-top:8px" onclick="clearCase()">Formular leeren</button>
+
+  <div class="section-title">Zuletzt gemeldet</div>
+
+  <div id="recent-cases">
+    <div class="case-card">
+      <div class="case-head">
+        <span class="badge badge-amber">Aufrüstung</span>
+        <span class="case-title">Indo-Pazifik · Stufe 3</span>
+      </div>
+      <div class="case-body">Marine-Aufrüstung über Schwellenwert. 47 Nutzerstimmen · GGL benachrichtigt.</div>
+    </div>
+    <div class="case-card pending">
+      <div class="case-head">
+        <span class="badge badge-blue">Wasser</span>
+        <span class="case-title">Nil-Staudamm · Stufe 2</span>
+      </div>
+      <div class="case-body">Grenzübergreifende Wasserentnahme. Abstimmung läuft: 23 Ja / 4 Nein.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= SCREEN: ABSTIMMEN ======= -->
+<div class="screen" id="s-abstimmen">
+  <div class="card">
+    <span class="label">GGL — Vorstufe</span>
+    <div class="heading">Abstimmen</div>
+    <div class="subtext">Kollektive Einschätzung als Trainingsdaten für den GGL. Deine Stimme formt das Modell.</div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn-sm active-filter" id="f-all" onclick="filterVotes('all')">Alle</button>
+    <button class="btn-sm" id="f-security" onclick="filterVotes('security')">Sicherheit</button>
+    <button class="btn-sm" id="f-climate" onclick="filterVotes('climate')">Klima</button>
+    <button class="btn-sm" id="f-open" onclick="filterVotes('open')">Offen</button>
+  </div>
+
+  <div id="vote-cards">
+    <div class="case-card" data-cat="security">
+      <div class="case-head">
+        <span class="badge badge-red">Sicherheit</span>
+        <span class="case-title">Artillerie-Lieferungen — Eskalation?</span>
+        <span class="badge badge-gold">Offen</span>
+      </div>
+      <div class="case-body">Massenlieferung schwerer Artillerie in aktives Konfliktgebiet. Verstößt dies gegen Art. 20 (Aufrüstungsspirale als Charta-Verletzung)?</div>
+      <div class="vote-row">
+        <button class="vote-btn" onclick="castVote(this,'yes','v1')">Ja, Verletzung</button>
+        <button class="vote-btn" onclick="castVote(this,'no','v1')">Nein, kein Verstoß</button>
+      </div>
+      <div id="v1-result" style="display:none;margin-top:8px;font-size:12px;color:var(--text3)"></div>
+    </div>
+
+    <div class="case-card" data-cat="climate">
+      <div class="case-head">
+        <span class="badge badge-blue">Klima</span>
+        <span class="case-title">LNG-Terminal — Atmosphärenverstoß?</span>
+        <span class="badge badge-gold">Offen</span>
+      </div>
+      <div class="case-body">Neues LNG-Terminal erhöht regionale Methanemissionen messbar über den adaptierten Schwellenwert (Art. 2). Charta-Verletzung Art. 3?</div>
+      <div class="vote-row">
+        <button class="vote-btn" onclick="castVote(this,'yes','v2')">Ja, Verletzung</button>
+        <button class="vote-btn" onclick="castVote(this,'no','v2')">Nein, kein Verstoß</button>
+      </div>
+      <div id="v2-result" style="display:none;margin-top:8px;font-size:12px;color:var(--text3)"></div>
+    </div>
+
+    <div class="case-card coop" data-cat="security">
+      <div class="case-head">
+        <span class="badge badge-green">Kooperation</span>
+        <span class="case-title">Rüstungsexportstopp — Charta-konform?</span>
+        <span class="badge badge-gold">Offen</span>
+      </div>
+      <div class="case-body">Freiwilliger Rüstungsexportstopp eines Staates in Konfliktregion. Qualifiziert dies als kooperativer Akt nach Art. 21 (Abrüstung als dominante Strategie)?</div>
+      <div class="vote-row">
+        <button class="vote-btn" onclick="castVote(this,'yes','v3')">Ja, konform</button>
+        <button class="vote-btn" onclick="castVote(this,'no','v3')">Nein, nicht ausreichend</button>
+      </div>
+      <div id="v3-result" style="display:none;margin-top:8px;font-size:12px;color:var(--text3)"></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="subtext" style="text-align:center;font-size:13px">Abstimmungsergebnisse fließen in das adaptive Regelmodell (Art. 2) ein. Anonym · dezentral gespeichert.</div>
+</div>
+
+<!-- ======= SCREEN: SIMULATION ======= -->
+<div class="screen" id="s-simulation">
+  <div class="card">
+    <span class="label">Nash-Simulator · Art. 2</span>
+    <div class="heading">Was passiert wenn?</div>
+    <div class="subtext">Stelle Szenarien ein und erlebe wie das Gleichgewicht kippt.</div>
+  </div>
+
+  <div class="sim-box">
+    <div class="label">Szenario wählen</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px">
+      <button class="btn-sm" onclick="loadScenario('ruestung')" id="sc-ruestung">Aufrüstung</button>
+      <button class="btn-sm" onclick="loadScenario('wasser')" id="sc-wasser">Wasserkonflikt</button>
+      <button class="btn-sm" onclick="loadScenario('co2')" id="sc-co2">CO₂-Spirale</button>
+      <button class="btn-sm" onclick="loadScenario('koop')" id="sc-koop">Kooperation</button>
+    </div>
+
+    <div class="label">Charta-Stärke α</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <input type="range" min="0" max="10" value="5" id="sl-alpha" oninput="runSim()" style="flex:1">
+      <span id="v-alpha" style="font-size:13px;color:var(--accent);min-width:16px;font-weight:600">5</span>
+    </div>
+
+    <div class="label">Infrastruktur-Verschränkung</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <input type="range" min="0" max="10" value="4" id="sl-interd" oninput="runSim()" style="flex:1">
+      <span id="v-interd" style="font-size:13px;color:var(--blue);min-width:16px;font-weight:600">4</span>
+    </div>
+
+    <div class="label">Zukunftsgewicht δ</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <input type="range" min="0" max="10" value="6" id="sl-delta" oninput="runSim()" style="flex:1">
+      <span id="v-delta" style="font-size:13px;color:var(--gold);min-width:16px;font-weight:600">6</span>
+    </div>
+
+    <div class="sim-actors">
+      <div class="actor-card" id="actor-a">
+        <div class="actor-icon">🏛</div>
+        <div class="actor-name" id="actor-a-name">Akteur A</div>
+        <div class="actor-status" id="actor-a-status">—</div>
+      </div>
+      <div class="actor-card" id="actor-b">
+        <div class="actor-icon">🏴</div>
+        <div class="actor-name" id="actor-b-name">Akteur B</div>
+        <div class="actor-status" id="actor-b-status">—</div>
+      </div>
+    </div>
+
+    <div class="result-box neutral" id="sim-result">
+      <div class="result-text neutral" id="sim-result-text">Parameter einstellen…</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px" id="sim-detail"></div>
+    </div>
+  </div>
+
+  <div class="section-title">Ventil-Protokoll (Art. 35)</div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span class="label" style="margin:0">Aktueller Zustand</span>
+      <span id="ventil-status" class="badge badge-gold">Bereit</span>
+    </div>
+    <div class="prog"><div class="prog-fill" id="ventil-bar" style="background:var(--accent);width:60%"></div></div>
+    <div style="font-size:12px;color:var(--text3);margin-top:6px" id="ventil-text">Kooperationslevel: 60%</div>
+  </div>
+
+  <div class="section-title">Deeskalationsfenster</div>
+  <div class="card2">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:14px;font-weight:500">Aktuelles Fenster</span>
+      <span id="window-days" class="badge badge-green">30 Tage offen</span>
+    </div>
+    <div class="prog" style="margin-top:8px"><div class="prog-fill" id="window-bar" style="background:var(--accent);width:100%"></div></div>
+  </div>
+</div>
+
+<!-- ======= SCREEN: TRAINING ======= -->
+<div class="screen" id="s-training">
+  <div class="card">
+    <span class="label">Kollektives Training</span>
+    <div class="heading">Dein Beitrag</div>
+    <div class="subtext">Jede Aktion trainiert das globale Modell. Jeder kann mitmachen.</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-val" id="user-pts">147</div>
+      <div class="stat-lbl">Deine Punkte</div>
+      <div class="prog"><div class="prog-fill" style="background:var(--accent);width:49%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">Lv 3</div>
+      <div class="stat-lbl">Sensor-Rang</div>
+      <div class="prog"><div class="prog-fill" style="background:var(--gold);width:70%"></div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Trainingsaufgaben</div>
+
+  <div class="training-item" onclick="doTraining('fall',15)">
+    <div class="t-icon" style="background:var(--red-dim)">
+      <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:var(--red);stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div class="t-content">
+      <div class="t-title">Fall melden</div>
+      <div class="t-sub">Reale Verletzung beschreiben · Sensor trainieren</div>
+    </div>
+    <div class="t-pts">+15 P</div>
+  </div>
+
+  <div class="training-item" onclick="doTraining('vote',8)">
+    <div class="t-icon" style="background:var(--blue-dim)">
+      <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:var(--blue);stroke-width:2;stroke-linecap:round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="t-content">
+      <div class="t-title">Abstimmen</div>
+      <div class="t-sub">GGL-Vorstufe trainieren · kollektive Einschätzung</div>
+    </div>
+    <div class="t-pts">+8 P</div>
+  </div>
+
+  <div class="training-item" onclick="doTraining('sim',12)">
+    <div class="t-icon" style="background:var(--accent-dim)">
+      <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    </div>
+    <div class="t-content">
+      <div class="t-title">Szenario spielen</div>
+      <div class="t-sub">Nash-Modell kalibrieren · Kipppunkte lernen</div>
+    </div>
+    <div class="t-pts">+12 P</div>
+  </div>
+
+  <div class="training-item" onclick="doTraining('charta',5)">
+    <div class="t-icon" style="background:var(--gold-dim)">
+      <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:var(--gold);stroke-width:2;stroke-linecap:round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </div>
+    <div class="t-content">
+      <div class="t-title">Artikel lesen</div>
+      <div class="t-sub">Wissen aufbauen · Charta verstehen</div>
+    </div>
+    <div class="t-pts">+5 P</div>
+  </div>
+
+  <div class="section-title">KI & Axiom-Bindung</div>
+  <div class="axiom-banner" style="border-left-color:var(--accent)">
+    <div class="axiom-text" style="color:var(--accent)">KI in diesem System ist Axiom-gebunden: Art. 1 (Leben) ist ein unveränderlicher Constraint. KI entscheidet nie allein — sie unterstützt, schlägt vor, warnt. Die finale Entscheidung liegt beim Menschen und beim GGL.</div>
+  </div>
+
+  <div class="section-title">Globaler Trainingsstand</div>
+  <div class="card2">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;color:var(--text2)">Gemeldete Fälle gesamt</span>
+      <span style="font-size:13px;font-weight:600" id="total-cases">24</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;color:var(--text2)">Abstimmungen gesamt</span>
+      <span style="font-size:13px;font-weight:600">189</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;color:var(--text2)">Aktive Nutzer</span>
+      <span style="font-size:13px;font-weight:600" id="total-users">341</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;color:var(--text2)">Modellgenauigkeit</span>
+      <span style="font-size:13px;font-weight:600;color:var(--accent)">73%</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <button class="btn btn-outline" onclick="showInfo()">Wie funktioniert das Training?</button>
+</div>
+
+<!-- TABBAR -->
+<div id="tabbar">
+  <button class="tab active" id="tab-home" onclick="goTab('home')" aria-label="Übersicht">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Übersicht
+  </button>
+  <button class="tab" id="tab-charta" onclick="goTab('charta')" aria-label="Charta">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Charta
+  </button>
+  <button class="tab" id="tab-melden" onclick="goTab('melden')" aria-label="Fall melden">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Melden
+  </button>
+  <button class="tab" id="tab-simulation" onclick="goTab('simulation')" aria-label="Simulation">
+    <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Simulator
+  </button>
+  <button class="tab" id="tab-training" onclick="goTab('training')" aria-label="Training">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Training
+  </button>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- MODAL -->
+<div id="modal-overlay" onclick="closeModal()">
+  <div id="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div id="modal-content"></div>
+    <button class="btn btn-outline" style="margin-top:16px" onclick="closeModal()">Schließen</button>
+  </div>
+</div>
+
+<script>
+const titles = { home:'Übersicht', charta:'Charta · 38 Artikel', melden:'Fall melden', abstimmen:'Abstimmen', simulation:'Nash-Simulator', training:'Training & KI' };
+
+function goTab(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const screenId = id === 'abstimmen' ? 's-abstimmen' : 's-' + id;
+  const scr = document.getElementById(screenId);
+  if (scr) { scr.classList.add('active'); scr.scrollTop = 0; window.scrollTo(0,0); }
+  const tab = document.getElementById('tab-' + (id === 'abstimmen' ? 'abstimmen' : id));
+  if (tab) tab.classList.add('active');
+  document.getElementById('screen-title').textContent = titles[id] || id;
+  if (id === 'simulation') runSim();
+}
+
+function toggleArt(el) {
+  el.classList.toggle('open');
+}
+
+function filterArt(q) {
+  const items = document.querySelectorAll('.artikel-item');
+  q = q.toLowerCase();
+  items.forEach(item => {
+    item.style.display = !q || item.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+const escalDescs = ['','Asymmetrie erkannt — Sensor schlägt an, kein Eingriff noch.','Erste Aufrüstungsbewegung — Ventil Stufe 1 wird aktiviert.','Reaktive Aufrüstung — Art. 6 Nullstellung wird vorbereitet.','Konfliktschwelle — Elite-Targeting aktiv, letzte Chance.','Bewaffneter Konflikt — vollständige Nullstellung, Hardware-Eid.'];
+const escalColors = ['','badge-blue','badge-gold','badge-amber','badge-red','badge-red'];
+
+function updateEscal(v) {
+  const badge = document.getElementById('escal-badge');
+  badge.textContent = 'Stufe ' + v;
+  badge.className = 'badge ' + escalColors[v];
+  document.getElementById('escal-desc').textContent = escalDescs[v];
+}
+
+let caseCount = 24, userCount = 341, userPts = 147;
+
+function submitCase() {
+  const type = document.getElementById('case-type').value;
+  const desc = document.getElementById('case-desc').value;
+  if (!type) { showToast('Bitte Art der Verletzung wählen'); return; }
+  if (!desc) { showToast('Bitte Beschreibung eingeben'); return; }
+  caseCount++;
+  userPts += 15;
+  document.getElementById('cases-count').textContent = caseCount;
+  document.getElementById('total-cases').textContent = caseCount;
+  document.getElementById('user-pts').textContent = userPts;
+  showToast('Fall eingereicht · +15 Punkte · Danke');
+  clearCase();
+}
+
+function clearCase() {
+  document.getElementById('case-type').value = '';
+  document.getElementById('case-region').value = '';
+  document.getElementById('case-desc').value = '';
+  document.getElementById('case-arts').value = '';
+  document.getElementById('escal-slider').value = 2;
+  updateEscal(2);
+}
+
+function castVote(btn, val, id) {
+  const row = btn.closest('.vote-row');
+  row.querySelectorAll('.vote-btn').forEach(b => b.classList.remove('yes','no'));
+  btn.classList.add(val === 'yes' ? 'yes' : 'no');
+  const yes = Math.floor(Math.random() * 40) + 30;
+  const no = Math.floor(Math.random() * 20) + 5;
+  const r = document.getElementById(id + '-result');
+  r.style.display = 'block';
+  r.textContent = yes + ' Ja · ' + no + ' Nein · ' + (Math.round(yes/(yes+no)*100)) + '% Verletzung';
+  userPts += 8;
+  document.getElementById('user-pts').textContent = userPts;
+  showToast('+8 Punkte · Stimme gezählt');
+}
+
+function filterVotes(cat) {
+  document.querySelectorAll('.case-card[data-cat]').forEach(c => {
+    c.style.display = (cat === 'all' || c.dataset.cat === cat) ? '' : 'none';
+  });
+  document.querySelectorAll('[id^="f-"]').forEach(b => b.style.fontWeight = '');
+  const fb = document.getElementById('f-' + cat);
+  if (fb) fb.style.fontWeight = '700';
+}
+
+const scenarios = {
+  ruestung: { a:'Militärmacht', b:'Nachbarstaat', aState:'defect', bState:'defect', aS:'Rüstet auf', bS:'Rüstet auf' },
+  wasser: { a:'Oberliegerstaat', b:'Unterliegerstaat', aState:'defect', bState:'neutral', aS:'Übernutzung', bS:'Betroffen' },
+  co2: { a:'Industriestaat', b:'Kleinstaat', aState:'defect', bState:'coop', aS:'Defektiert', bS:'Kooperiert' },
+  koop: { a:'Staat A', b:'Staat B', aState:'coop', bState:'coop', aS:'Kooperiert', bS:'Kooperiert' },
+};
+
+function loadScenario(key) {
+  const s = scenarios[key];
+  if (!s) return;
+  document.getElementById('actor-a-name').textContent = s.a;
+  document.getElementById('actor-b-name').textContent = s.b;
+  document.getElementById('actor-a-status').textContent = s.aS;
+  document.getElementById('actor-b-status').textContent = s.bS;
+  const ac = document.getElementById('actor-a'), bc = document.getElementById('actor-b');
+  ac.className = 'actor-card ' + s.aState;
+  bc.className = 'actor-card ' + s.bState;
+  document.querySelectorAll('[id^="sc-"]').forEach(b => b.style.borderColor = '');
+  const sb = document.getElementById('sc-' + key);
+  if (sb) sb.style.borderColor = 'var(--accent)';
+  runSim();
+}
+
+function runSim() {
+  const a = +document.getElementById('sl-alpha').value;
+  const d = +document.getElementById('sl-delta').value;
+  const i = +document.getElementById('sl-interd').value;
+  document.getElementById('v-alpha').textContent = a;
+  document.getElementById('v-delta').textContent = d;
+  document.getElementById('v-interd').textContent = i;
+
+  const coop = 2 + a * 0.8 + d * 0.5 + i * 0.4;
+  const def = 6 - a * 0.6 - d * 0.3 - i * 0.5;
+  const res = document.getElementById('sim-result');
+  const rt = document.getElementById('sim-result-text');
+  const rd = document.getElementById('sim-detail');
+  const vs = document.getElementById('ventil-status');
+  const vb = document.getElementById('ventil-bar');
+  const vt = document.getElementById('ventil-text');
+  const wd = document.getElementById('window-days');
+  const wb = document.getElementById('window-bar');
+
+  let pct = Math.min(100, Math.round((coop / (coop + Math.max(def,0.1))) * 100));
+
+  if (coop > def + 0.8) {
+    res.className = 'result-box coop';
+    rt.className = 'result-text coop';
+    rt.textContent = 'Kooperation ist die dominante Strategie';
+    rd.textContent = 'Kooperation: ' + coop.toFixed(1) + ' · Defektion: ' + def.toFixed(1);
+    vs.className = 'badge badge-green'; vs.textContent = 'Aktiv · Bonus';
+    vb.style.background = 'var(--accent)'; vb.style.width = pct + '%';
+    vt.textContent = 'Kooperationslevel: ' + pct + '%';
+    wd.className = 'badge badge-green'; wd.textContent = '30 Tage offen';
+    wb.style.background = 'var(--accent)'; wb.style.width = '100%';
+  } else if (def > coop + 0.8) {
+    res.className = 'result-box defect';
+    rt.className = 'result-text defect';
+    rt.textContent = 'Defektion bleibt rational — Parameter erhöhen';
+    rd.textContent = 'Kooperation: ' + coop.toFixed(1) + ' · Defektion: ' + def.toFixed(1);
+    vs.className = 'badge badge-red'; vs.textContent = 'Gedrosselt';
+    vb.style.background = 'var(--red)'; vb.style.width = pct + '%';
+    vt.textContent = 'Kooperationslevel: ' + pct + '%';
+    wd.className = 'badge badge-amber'; wd.textContent = '12 Tage offen';
+    wb.style.background = 'var(--amber)'; wb.style.width = '40%';
+  } else {
+    res.className = 'result-box neutral';
+    rt.className = 'result-text neutral';
+    rt.textContent = 'Kipppunkt — erste Unterzeichner entscheidend';
+    rd.textContent = 'Kooperation: ' + coop.toFixed(1) + ' · Defektion: ' + def.toFixed(1);
+    vs.className = 'badge badge-gold'; vs.textContent = 'Bereit';
+    vb.style.background = 'var(--gold)'; vb.style.width = pct + '%';
+    vt.textContent = 'Kooperationslevel: ' + pct + '%';
+    wd.className = 'badge badge-gold'; wd.textContent = '30 Tage offen';
+    wb.style.background = 'var(--gold)'; wb.style.width = '100%';
+  }
+}
+
+function doTraining(type, pts) {
+  const screens = { fall:'melden', vote:'abstimmen', sim:'simulation', charta:'charta' };
+  userPts += pts;
+  document.getElementById('user-pts').textContent = userPts;
+  showToast('+' + pts + ' Punkte');
+  const target = screens[type];
+  if (target) setTimeout(() => goTab(target), 600);
+}
+
+function showInfo() {
+  document.getElementById('modal-content').innerHTML = `
+    <div class="heading" style="margin-bottom:10px">Wie funktioniert das Training?</div>
+    <p style="font-size:14px;color:var(--text2);line-height:1.65;margin-bottom:12px">Jede deiner Aktionen erzeugt Trainingsdaten für drei Modellschichten:</p>
+    <div class="card2" style="margin-bottom:8px"><span style="font-size:14px;font-weight:600;color:var(--text)">1. Sensor-Modell</span><br><span style="font-size:13px;color:var(--text3)">Gemeldete Fälle trainieren die Erkennung von Eskalationsmustern (Art. 36).</span></div>
+    <div class="card2" style="margin-bottom:8px"><span style="font-size:14px;font-weight:600;color:var(--text)">2. GGL-Modell</span><br><span style="font-size:13px;color:var(--text3)">Abstimmungen trainieren die Einschätzung von Charta-Verletzungen — kollektive Intelligenz als GGL-Vorstufe.</span></div>
+    <div class="card2" style="margin-bottom:8px"><span style="font-size:14px;font-weight:600;color:var(--text)">3. Nash-Modell</span><br><span style="font-size:13px;color:var(--text3)">Simulator-Ergebnisse kalibrieren die adaptiven Parameter α und δ (Art. 2).</span></div>
+    <div class="axiom-banner" style="margin-top:14px"><div class="axiom-text">KI entscheidet nie allein. Art. 1 (Leben) ist unveränderlicher Constraint. Alle Modelle sind transparent und durch den GGL prüfbar.</div></div>`;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// PWA Installations-Code
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').classList.add('show');
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        showToast('App wurde installiert! 🎉');
+      } else {
+        showToast('Installation abgebrochen');
+      }
+      document.getElementById('install-banner').classList.remove('show');
+      deferredPrompt = null;
+    });
+  }
+}
+
+// Initial setup
+loadScenario('ruestung');
+runSim();
+
+let c = 24, u = 341;
+setInterval(() => {
+  if (Math.random() > 0.7) {
+    u += Math.floor(Math.random() * 3);
+    document.getElementById('users-count').textContent = u;
+    document.getElementById('total-users').textContent = u;
+  }
+}, 4000);
+</script>
+</body>
+</html>
